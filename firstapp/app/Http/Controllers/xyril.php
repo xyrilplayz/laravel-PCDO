@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,30 +9,42 @@ use Illuminate\Support\Facades\Session;
 
 class xyril extends Controller
 {
-    function login(){
+    function login()
+    {
+        if (Auth::check()) {
+            return redirect(route('home'));
+        }
+
         return view('login');
     }
 
-    function registration(){
+
+    function registration()
+    {
+        if (Auth::check()) {
+            return redirect(route('home'));
+        }
         return view('registration');
     }
 
-    function loginPost(Request $request){
+    function loginPost(Request $request)
+    {
         $request->validate([
             'email' => 'required',
             'password' => 'required'
         ]);
 
-        $credentials = $request->only('email','password');
-        if(Auth::attempt($credentials)){
+        $credentials = $request->only('email', 'password');
+        if (Auth::attempt($credentials)) {
             return redirect()->intended(route('home'));
         }
-        return redirect(route('login'))->with("Error", "Incorrect login Details");
+        return redirect(route('login'))->with("error", "Incorrect login Details");
     }
 
-    function registrationPost(Request $request){
+    function registrationPost(Request $request)
+    {
         $request->validate([
-            'name'=> 'required',
+            'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required'
         ]);
@@ -42,15 +53,16 @@ class xyril extends Controller
         $data['email'] = $request->email;
         $data['password'] = Hash::make($request->password);
         $users = User::create($data);
-        if(!$users){
-            return redirect(route(name: 'registration'))->with("Error", "Incorrect Registration Details");
+        if (!$users) {
+            return redirect(route(name: 'registration'))->with("error", "Incorrect Registration Details");
         }
-        return redirect(route('login'))->with("Success", "Registered in");
+        return redirect(route('login'))->with("success", "Registered in");
     }
 
-    function logout(){
+    function logout()
+    {
         Session::flush();
-        Auth::logout();
+        Auth::guard('web')->logout();
         return redirect(route('login'));
 
     }
