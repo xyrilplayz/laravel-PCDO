@@ -9,7 +9,7 @@ class ProgramSeeder extends Seeder
 {
     public function run(): void
     {
-        $programs = ['USAD', 'LICAP', 'COPSE', 'SULONG', 'LIVELIHOOD'];
+        $programs = ['USAD', 'LICAP', 'COPSE', 'SULONG', 'PCRLP'];
 
         foreach ($programs as $program) {
             Program::create(['name' => $program]);
