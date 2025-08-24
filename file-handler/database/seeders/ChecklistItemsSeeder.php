@@ -11,7 +11,6 @@ class ChecklistItemsSeeder extends Seeder
     {
         $items = [
             "Letter",
-            "MCDC Endorsement",
             "Project proposal",
             "Financial Plan",
             "GA Resolution_ Avail",
@@ -33,7 +32,10 @@ class ChecklistItemsSeeder extends Seeder
             "Authenticated copy of Articles and ByLaws of Cooperative",
             "LGU or SP Accreditation",
             "MAO Certificate",
-            "MDRRMO Certification"
+            "MDRRMO Certification",
+            "MCDC Endorsement",
+            "MCDO",
+            "PCC"
         ];
 
         foreach ($items as $item) {

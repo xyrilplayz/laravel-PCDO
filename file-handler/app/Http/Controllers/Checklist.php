@@ -12,9 +12,17 @@ class Checklist extends Controller
     public function show($cooperativeId)
     {
         $cooperative = Cooperative::with('program')->findOrFail($cooperativeId);
-        $checklistItems = ChecklistItem::all();
 
-        // if you want to attach uploads for each item
+        // Filter checklist items depending on program
+        if (in_array($cooperative->program_id, [2, 5])) {
+
+            $checklistItems = ChecklistItem::all();
+        } else {
+
+            $checklistItems = ChecklistItem::whereBetween('id', [1, 24])->get();
+        }
+
+        // Attach uploads for each item
         foreach ($checklistItems as $item) {
             $item->upload = CooperativeUploads::where('cooperative_id', $cooperativeId)
                 ->where('checklist_item_id', $item->id)
@@ -23,6 +31,7 @@ class Checklist extends Controller
 
         return view('checklist', compact('checklistItems', 'cooperative'));
     }
+
 
     public function upload(Request $request, $cooperativeId)
     {
