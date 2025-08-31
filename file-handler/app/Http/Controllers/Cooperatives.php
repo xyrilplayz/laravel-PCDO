@@ -39,6 +39,7 @@ class Cooperatives extends Controller
         $cooperative = Cooperative::create([
             'name' => $request->name,
             'program_id' => $request->program_id,
+            'user_id' => auth()->id(),
         ]);
 
         return redirect()->route('checklist.show', $cooperative->id)

@@ -9,7 +9,18 @@ class Program extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'term_months',
+        'grace_period',
+        'min_amount',
+        'max_amount',
+    ];
+
+    public function loans()
+    {
+        return $this->hasMany(Loan::class);
+    }
 
     public function cooperatives()
     {

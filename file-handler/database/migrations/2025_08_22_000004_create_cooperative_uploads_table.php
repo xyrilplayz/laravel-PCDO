@@ -11,9 +11,11 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('cooperative_id');
             $table->unsignedBigInteger('checklist_item_id');
+            $table->foreign('cooperative_id')->references('id')->on('cooperatives')->onDelete('cascade');
+            $table->foreign('checklist_item_id')->references('id')->on('checklist_items')->onDelete('cascade');
             $table->string('file_name');
             $table->string('mime_type');
-            $table->binary('file_content'); // store file in DB
+            $table->binary('file_content'); // use longBlob to avoid encoding errors this is the code ALTER TABLE cooperative_uploads MODIFY file_content LONGBLOB;
             $table->timestamps();
         });
     }

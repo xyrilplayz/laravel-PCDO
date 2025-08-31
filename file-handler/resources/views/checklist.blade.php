@@ -37,5 +37,34 @@
         <a href="{{ route('uploads.search', $cooperative->id) }}" class="btn btn-secondary mt-3">
             View All Uploaded Files
         </a>
+        @if($loan)
+            <hr>
+            <h4>Adjust Loan Amount</h4>
+            <form action="{{ route('loans.updateAmount', $loan->id) }}" method="POST" class="mb-4">
+                @csrf
+                @method('PUT')
+
+                <div class="mb-2">
+                    <label>Loan Amount</label>
+                    <input type="number" name="amount" class="form-control" value="{{ $loan->amount }}" step="0.01">
+                </div>
+
+                <div class="mb-2">
+                    <label>Preset</label>
+                    <select name="preset" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option value="min">Min: {{ number_format($loan->program->min_amount, 2) }}</option>
+                        <option value="max">Max: {{ number_format($loan->program->max_amount, 2) }}</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Loan Amount</button>
+            </form>
+            <a href="{{ route('loans.show', $loan->id) }}" class="btn btn-primary mt-3">
+                View Loan
+            </a>
+        @endif
+
+
     </div>
 @endsection

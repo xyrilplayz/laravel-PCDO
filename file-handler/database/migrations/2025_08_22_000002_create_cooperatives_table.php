@@ -10,6 +10,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('program_id')->constrained('programs')->onDelete('cascade');
             $table->string('name');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

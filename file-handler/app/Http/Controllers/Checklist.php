@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ChecklistItem;
 use App\Models\CooperativeUploads;
 use App\Models\Cooperative;
-
+use App\Models\Loan;
 class Checklist extends Controller
 {
     public function show($cooperativeId)
@@ -14,7 +14,7 @@ class Checklist extends Controller
         $cooperative = Cooperative::with('program')->findOrFail($cooperativeId);
 
         // Filter checklist items depending on program
-        if (in_array($cooperative->program_id, [2, 5])) {
+        if (in_array($cooperative->program_id, [3, 5])) {
 
             $checklistItems = ChecklistItem::all();
         } else {
@@ -28,8 +28,12 @@ class Checklist extends Controller
                 ->where('checklist_item_id', $item->id)
                 ->first();
         }
+        $allUploaded = $checklistItems->every(fn($item) => $item->upload);
+        $loan = Loan::where('cooperative_id', $cooperativeId)
+            ->where('program_id', $cooperative->program_id)
+            ->first();
 
-        return view('checklist', compact('checklistItems', 'cooperative'));
+        return view('checklist', compact('checklistItems', 'cooperative', 'loan', 'allUploaded'));
     }
 
 
@@ -61,7 +65,15 @@ class Checklist extends Controller
             'file_content' => file_get_contents($file->getRealPath()),
         ]);
 
+        try {
+            $this->creatloan($cooperativeId);
+        } catch (\Exception $e) {
+            // catch any unexpected errors to prevent breaking the upload
+            \Log::error("Loan creation failed: " . $e->getMessage());
+        }
         return back()->with('success', 'File uploaded successfully and old file replaced!');
+
+
     }
 
     public function delete($id)
@@ -70,9 +82,8 @@ class Checklist extends Controller
         $upload->delete();
 
         return back()->with('success', 'File deleted successfully!');
+
     }
-
-
 
     public function download($id)
     {
@@ -106,6 +117,43 @@ class Checklist extends Controller
 
         return view('checklist_search_uploads', compact('uploads', 'programs'));
     }
+    private function creatloan($cooperativeId)
+    {
+        $cooperative = Cooperative::with('program')->find($cooperativeId);
+
+        // Stop if cooperative or program is missing
+        if (!$cooperative || !$cooperative->program) {
+            return; // do nothing
+        }
+
+        // Determine required checklist items
+        $requiredItems = in_array($cooperative->program_id, [2, 5])
+            ? ChecklistItem::count()
+            : ChecklistItem::whereBetween('id', [1, 24])->count();
+
+        // Count uploaded items
+        $uploadedCount = CooperativeUploads::where('cooperative_id', $cooperativeId)->count();
+
+        // Use <= for testing, >= for production
+        if ($uploadedCount >= $requiredItems) {
+            $existingLoan = Loan::where('cooperative_id', $cooperativeId)
+                ->where('program_id', $cooperative->program_id)
+                ->first();
+
+            if (!$existingLoan) {
+                $loan = Loan::create([
+                    'cooperative_id' => $cooperativeId,
+                    'program_id' => $cooperative->program_id,
+                    'amount' => $cooperative->program->max_amount,     // use the program's max amount
+                    'start_date' => now(),
+                    'grace_period' => $cooperative->program->grace_period ?? 0,
+                    'term_months' => $cooperative->program->term_months,  // use the program's term
+                ]);
+                $loan->generateSchedule();
+            }
+        }
+    }
+
 
 
 }

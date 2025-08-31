@@ -30,9 +30,9 @@
             <select class="form-control" name="program_id" id="program_id" required>
                 <option value="" disabled selected>-- Select Program --</option>
                 <option value="1">USAD</option>
-                <option value="2">LICAP</option>
-                <option value="3">COPSE</option>
-                <option value="4">SULONG</option>
+                <option value="2">SULONG</option>
+                <option value="3">LICAP</option>
+                <option value="4">COPSE</option>
                 <option value="5">PCRLP</option>
             </select>
         </div>

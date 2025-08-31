@@ -13,10 +13,17 @@ class Cooperative extends Model
     protected $fillable = [
         'name',
         'program_id',
+        'user_id',
     ];
 
-     public function program()
+    public function program()
     {
         return $this->belongsTo(Program::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
 }
