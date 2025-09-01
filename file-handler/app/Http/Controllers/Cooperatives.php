@@ -29,17 +29,21 @@ class Cooperatives extends Controller
             ->first();
 
         if ($existing) {
-            // Instead of blocking, show a view that lets user decide
             return view('coop_exists', [
                 'cooperative' => $existing
             ]);
         }
 
-        // If no existing cooperative, create a new one
+        // Create cooperative
+        //dd($request->all());
+
+        $gracePeriod = $request->boolean('without_grace') ? 0 : 4;
+
         $cooperative = Cooperative::create([
             'name' => $request->name,
             'program_id' => $request->program_id,
             'user_id' => auth()->id(),
+            'with_grace' => $gracePeriod,
         ]);
 
         return redirect()->route('checklist.show', $cooperative->id)

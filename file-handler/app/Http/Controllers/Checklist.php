@@ -121,21 +121,18 @@ class Checklist extends Controller
     {
         $cooperative = Cooperative::with('program')->find($cooperativeId);
 
-        // Stop if cooperative or program is missing
         if (!$cooperative || !$cooperative->program) {
-            return; // do nothing
+            return;
         }
 
-        // Determine required checklist items
         $requiredItems = in_array($cooperative->program_id, [2, 5])
             ? ChecklistItem::count()
             : ChecklistItem::whereBetween('id', [1, 24])->count();
 
-        // Count uploaded items
         $uploadedCount = CooperativeUploads::where('cooperative_id', $cooperativeId)->count();
 
-        // Use <= for testing, >= for production
-        if ($uploadedCount >= $requiredItems) {
+        // ⚠️ for production use >=
+        if ($uploadedCount <= $requiredItems) {
             $existingLoan = Loan::where('cooperative_id', $cooperativeId)
                 ->where('program_id', $cooperative->program_id)
                 ->first();
@@ -144,16 +141,15 @@ class Checklist extends Controller
                 $loan = Loan::create([
                     'cooperative_id' => $cooperativeId,
                     'program_id' => $cooperative->program_id,
-                    'amount' => $cooperative->program->max_amount,     // use the program's max amount
+                    'amount' => $cooperative->program->max_amount,
                     'start_date' => now(),
-                    'grace_period' => $cooperative->program->grace_period ?? 0,
-                    'term_months' => $cooperative->program->term_months,  // use the program's term
+                    'grace_period' => $cooperative->with_grace,
+                    'term_months' => $cooperative->program->term_months,
                 ]);
+
                 $loan->generateSchedule();
             }
         }
     }
-
-
 
 }

@@ -42,29 +42,16 @@ class LoanController extends Controller
 
         // Get program details
         $program = Program::findOrFail($validated['program_id']);
-
+        $gracePeriod = $request->has('with_grace') ? $program->grace_period : 0;
         // Merge program values into loan
         $loan = Loan::create([
             'cooperative_id' => $validated['cooperative_id'],
             'program_id' => $validated['program_id'],
             'amount' => $validated['amount'],
             'start_date' => $validated['start_date'],
-            'grace_period' => $program->grace_period,   // auto-fill from program
-            'term_months' => $program->term_months,    // auto-fill from program
+            'grace_period' => $gracePeriod,
+            'term_months' => $program->term_months,
         ]);
-
-        // Generate payment schedule
-        $dueDate = Carbon::parse($loan->start_date)->addMonths($loan->grace_period);
-        $monthlyAmount = $loan->amount / $loan->term_months;
-
-        for ($i = 1; $i <= $loan->term_months; $i++) {
-            PaymentSchedule::create([
-                'loan_id' => $loan->id,
-                'due_date' => $dueDate->copy(),
-                'amount_due' => $monthlyAmount,
-            ]);
-            $dueDate->addMonth();
-        }
 
         return redirect()
             ->route('loans.index')
@@ -117,5 +104,26 @@ class LoanController extends Controller
 
         return back()->with('error', 'No user/email found for this loan.');
     }
+
+    public function penalty(Request $request, PaymentSchedule $schedule)
+{
+    if ($request->has('add')) {
+        // 1% penalty of this schedule's amount due
+        $penalty = $schedule->amount_due * 0.01;
+        $schedule->penalty_amount += $penalty;
+        $schedule->save();
+
+        return back()->with('success', '1% penalty added to this overdue schedule.');
+    }
+
+    if ($request->has('remove')) {
+        $schedule->penalty_amount = 0;
+        $schedule->save();
+
+        return back()->with('success', 'Penalty removed from this schedule.');
+    }
+
+    return back()->with('error', 'Invalid penalty action.');
+}
 
 }

@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreign('checklist_item_id')->references('id')->on('checklist_items')->onDelete('cascade');
             $table->string('file_name');
             $table->string('mime_type');
-            $table->binary('file_content'); // use longBlob to avoid encoding errors this is the code ALTER TABLE cooperative_uploads MODIFY file_content LONGBLOB;
+            $table->binary('file_content'); // use longBlob to avoid encoding errors this is the code "ALTER TABLE cooperative_uploads MODIFY file_content LONGBLOB;"
             $table->timestamps();
         });
     }

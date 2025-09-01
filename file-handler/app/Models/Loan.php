@@ -15,16 +15,28 @@ class Loan extends Model
      */
     public function generateSchedule()
     {
-        $amountPerMonth = $this->amount / $this->term_months;
+        $monthsToPay = $this->term_months - $this->grace_period;
+
+        if ($monthsToPay <= 0) {
+            throw new \Exception('Invalid term and grace period.');
+        }
+
+        $amountPerMonth = round($this->amount / $monthsToPay, 2);
         $startDate = Carbon::parse($this->start_date)->addMonths($this->grace_period);
 
-        for ($i = 0; $i < $this->term_months; $i++) {
-            $this->paymentSchedules()->create([   // <- correct relation
-                'due_date' => $startDate->copy()->addMonths($i),
-                'amount_due' => $amountPerMonth,
+        for ($i = 1; $i <= $monthsToPay; $i++) {
+            // ✅ Adjust last payment to fix rounding issues
+            $amountDue = ($i === $monthsToPay)
+                ? $this->amount - ($amountPerMonth * ($monthsToPay - 1))
+                : $amountPerMonth;
+
+            $this->paymentSchedules()->create([
+                'due_date' => $startDate->copy()->addMonths($i - 1),
+                'amount_due' => $amountDue,
             ]);
         }
     }
+
     protected $fillable = [
         'cooperative_id',
         'program_id',
@@ -40,9 +52,9 @@ class Loan extends Model
 
     public function cooperative()
     {
-        return $this->belongsTo(Cooperative::class,'cooperative_id');
+        return $this->belongsTo(Cooperative::class, 'cooperative_id');
     }
-    
+
 }
 
 

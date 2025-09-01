@@ -14,6 +14,7 @@ class Cooperative extends Model
         'name',
         'program_id',
         'user_id',
+        'with_grace',
     ];
 
     public function program()

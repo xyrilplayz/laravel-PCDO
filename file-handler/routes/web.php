@@ -43,4 +43,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/schedules/{schedule}/mark-paid', [markPaid::class, 'markPaid'])->name('schedules.markPaid');
     Route::post('/loans/{loan}/send-overdue-email', [LoanController::class, 'sendOverdueEmail'])
         ->name('loans.sendOverdueEmail');
+    Route::post('/loans/schedules/{schedule}/penalty', [LoanController::class, 'penalty'])
+        ->name('schedules.penalty');
+
+
 });
