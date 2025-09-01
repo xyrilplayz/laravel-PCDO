@@ -12,19 +12,5 @@ class Cooperative extends Model
     // Add fields you want to be mass assignable
     protected $fillable = [
         'name',
-        'program_id',
-        'user_id',
-        'with_grace',
     ];
-
-    public function program()
-    {
-        return $this->belongsTo(Program::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
 }
