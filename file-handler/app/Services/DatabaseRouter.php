@@ -28,29 +28,60 @@ class DatabaseRouter
      * Safe sync from cloud to local only.
      * Avoids overwriting cloud data from local.
      */
-    public static function syncToLocal(string $table)
+    public static function syncToLocal(string $table): bool
     {
+        $updated = false;
         $cloudData = DB::connection('cloud')->table($table)->get();
 
-        DB::connection('local')->transaction(function () use ($cloudData, $table) {
+        DB::connection('local')->transaction(function () use ($cloudData, $table, &$updated) {
             foreach ($cloudData as $row) {
                 $rowArray = (array)$row;
-
-                // If row exists, only update if cloud row is newer
                 $existing = DB::connection('local')->table($table)->where('id', $row->id)->first();
+
                 if ($existing) {
-                    if (isset($rowArray['updated_at']) && isset($existing->updated_at)) {
-                        $cloudUpdated = Carbon::parse($rowArray['updated_at']);
-                        $localUpdated = Carbon::parse($existing->updated_at);
-                        if ($cloudUpdated->gt($localUpdated)) {
-                            DB::connection('local')->table($table)->where('id', $row->id)->update($rowArray);
-                        }
+                    if (isset($rowArray['updated_at'], $existing->updated_at) &&
+                        Carbon::parse($rowArray['updated_at'])->gt(Carbon::parse($existing->updated_at))) {
+                        DB::connection('local')->table($table)->where('id', $row->id)->update($rowArray);
+                        $updated = true;
                     }
                 } else {
                     DB::connection('local')->table($table)->insert($rowArray);
+                    $updated = true;
                 }
             }
         });
+
+        return $updated;
+    }
+
+    /**
+     * Safe sync from local to cloud only.
+     * Avoids overwriting cloud data from local.
+     */
+    public static function syncToCloud(string $table): bool
+    {
+        $updated = false;
+        $localData = DB::connection('local')->table($table)->get();
+
+        DB::connection('cloud')->transaction(function () use ($localData, $table, &$updated) {
+            foreach ($localData as $row) {
+                $rowArray = (array)$row;
+                $existing = DB::connection('cloud')->table($table)->where('id', $row->id)->first();
+
+                if ($existing) {
+                    if (isset($rowArray['updated_at'], $existing->updated_at) &&
+                        Carbon::parse($rowArray['updated_at'])->gt(Carbon::parse($existing->updated_at))) {
+                        DB::connection('cloud')->table($table)->where('id', $row->id)->update($rowArray);
+                        $updated = true;
+                    }
+                } else {
+                    DB::connection('cloud')->table($table)->insert($rowArray);
+                    $updated = true;
+                }
+            }
+        });
+
+        return $updated;
     }
 
     /**

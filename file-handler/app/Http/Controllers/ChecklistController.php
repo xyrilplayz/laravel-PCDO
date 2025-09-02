@@ -7,7 +7,9 @@ use App\Models\ChecklistItem;
 use App\Models\CooperativeUploads;
 use App\Models\Cooperative;
 use App\Models\Loan;
-class Checklist extends Controller
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+class ChecklistController extends Controller
 {
     public function show($cooperativeId)
     {
@@ -69,7 +71,7 @@ class Checklist extends Controller
             $this->creatloan($cooperativeId);
         } catch (\Exception $e) {
             // catch any unexpected errors to prevent breaking the upload
-            \Log::error("Loan creation failed: " . $e->getMessage());
+            Log::error("Loan creation failed: " . $e->getMessage());
         }
         return back()->with('success', 'File uploaded successfully and old file replaced!');
 

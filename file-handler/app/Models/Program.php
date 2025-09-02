@@ -11,6 +11,7 @@ class Program extends Model
 
     protected $fillable = [
         'name',
+        'details',
         'term_months',
         'grace_period',
         'min_amount',

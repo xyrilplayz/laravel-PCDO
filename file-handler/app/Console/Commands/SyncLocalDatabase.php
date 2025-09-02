@@ -12,7 +12,7 @@ class SyncLocalDatabase extends Command
      *
      * @var string
      */
-    protected $signature = 'app:sync-local-database';
+    protected $signature = 'sync:local-database';
 
     /**
      * The console command description.
@@ -26,12 +26,23 @@ class SyncLocalDatabase extends Command
      */
     public function handle()
     {
-        $tables = ['workloads','checklists','jobs','cooperatives','file_uploads','verifications','reviews'];
-
-        foreach ($tables as $table) {
-            DatabaseRouter::syncToLocal($table);
+        $tables = ['workloads','jobs','cooperatives','cooperative_uploads'];
+        $anyChanges = false;
+        if (DatabaseRouter::getConnection() == 'cloud') {
+            foreach ($tables as $table) {
+                $localUpdated = DatabaseRouter::syncToLocal($table);
+                $cloudUpdated = DatabaseRouter::syncToCloud($table);
+                if ($localUpdated || $cloudUpdated) $anyChanges = true;
+            }
+            if (!$anyChanges) {
+                $this->info('No tables have updates or new rows.');
+                return;
+            }
+            $this->info('Cloud → Local sync completed safely.');   
         }
-
-        $this->info('Cloud → Local sync completed safely.');
+        else {
+            $this->info('No connection found with cloud.');
+        }
     }
+
 }

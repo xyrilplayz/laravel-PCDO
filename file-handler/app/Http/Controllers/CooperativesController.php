@@ -7,7 +7,7 @@ use App\Models\Program;
 use App\Models\Cooperative;
 use Illuminate\Support\Facades\Auth;
 
-class Cooperatives extends Controller
+class CooperativesController extends Controller
 {
     // Show create form
     public function coop()
@@ -37,13 +37,8 @@ class Cooperatives extends Controller
         // Create cooperative
         //dd($request->all());
 
-        $gracePeriod = $request->boolean('without_grace') ? 0 : 4;
-
         $cooperative = Cooperative::create([
             'name' => $request->name,
-            'program_id' => $request->program_id,
-            'user_id' => auth()->id(),
-            'with_grace' => $gracePeriod,
         ]);
 
         return redirect()->route('checklist.show', $cooperative->id)

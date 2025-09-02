@@ -8,7 +8,7 @@ use App\Models\Cooperative;
 
 
 
-class Programs extends Controller
+class ProgramsController extends Controller
 {
     // Show the "Add Cooperative" form
     public function create()

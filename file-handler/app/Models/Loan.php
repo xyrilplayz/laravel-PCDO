@@ -5,9 +5,9 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 class Loan extends Model
 {
-    public function paymentSchedules()
+    public function getSchedules()
     {
-        return $this->hasMany(PaymentSchedule::class);
+        return $this->hasMany(AmmortizationSchedule::class);
     }
 
     /**
@@ -30,7 +30,7 @@ class Loan extends Model
                 ? $this->amount - ($amountPerMonth * ($monthsToPay - 1))
                 : $amountPerMonth;
 
-            $this->paymentSchedules()->create([
+            $this->getSchedules()->create([
                 'due_date' => $startDate->copy()->addMonths($i - 1),
                 'amount_due' => $amountDue,
             ]);

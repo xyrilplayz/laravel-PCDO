@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
-class xy extends Controller
+class AuthenticationController extends Controller
 {
     function login()
     {

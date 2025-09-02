@@ -1,19 +1,19 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\PaymentSchedule;
+use App\Models\AmmortizationSchedule;
 use Illuminate\Http\Request;
-class markPaid extends Controller
+class PaymentController extends Controller
 {
-    public function markPaid($id)
+    public function PaymentController($id)
     {
-        $schedule = PaymentSchedule::findOrFail($id);
-        $schedule->markPaid();
+        $schedule = AmmortizationSchedule::findOrFail($id);
+        $schedule->PaymentController();
 
         return back()->with('success', 'Payment marked as paid.');
     }
     public function notePayment(Request $request, $id)
     {
-        $schedule = PaymentSchedule::findOrFail($id);
+        $schedule = AmmortizationSchedule::findOrFail($id);
 
         $request->validate([
             'amount_paid' => 'required|numeric|min:0|max:' . $schedule->amount_due,

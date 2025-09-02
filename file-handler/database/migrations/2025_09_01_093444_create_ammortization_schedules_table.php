@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('installment');
             $table->dateTime('date_paid');
             $table->integer('ammount_paid');
-            $table->enum('status', ['Unpaid', 'Near Due', 'Overdue']);
+            $table->enum('status', ['Unpaid', 'Paid', 'Near Due', 'Overdue'])->default('Unpaid');
             $table->integer('penalty_ammount');
             $table->integer('balance');
             $table->string('notes');
