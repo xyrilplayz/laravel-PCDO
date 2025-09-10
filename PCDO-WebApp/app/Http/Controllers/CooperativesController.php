@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\CoopDetail;
 use App\Models\Cooperative;
 use Illuminate\Http\Request;
 
@@ -70,6 +68,7 @@ class CooperativesController extends Controller
         $cooperative->load('details');
         return inertia('cooperatives/show', [
             'cooperative' => $cooperative,
+            'details' => $cooperative->details,
         ]);
     }
 
@@ -80,6 +79,7 @@ class CooperativesController extends Controller
     {
         return inertia('cooperatives/edit', [
             'cooperative' => $cooperative,
+            'details' => $cooperative->details,
         ]);
     }
 
