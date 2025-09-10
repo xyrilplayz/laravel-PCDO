@@ -4,40 +4,30 @@ import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
 import { DropdownMenuRoot, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from 'reka-ui';
 import AppLayout from '@/layouts/AppLayout.vue';
-import cooperative from '@/routes/cooperative';
+import cooperative from '@/routes/cooperatives';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Cooperative Program', href: cooperative.index().url },
-    { title: 'Create Cooperative', href: cooperative.create().url },
-];
+const breadcrumbs: BreadcrumbItem [] = [
+    {title: 'Cooperative', href: cooperative.index().url},
+    {title: 'Create Cooperative', href: cooperative.create().url},
+]
 
-const programOptions = [
-    { label: 'USAD', value: '1' },
-    { label: 'LICAP', value: '2' },
-    { label: 'COPSE', value: '3' },
-    { label: 'SULONG', value: '4' },
-    { label: 'PCRLP', value: '5' },
-];
+defineProps({
+    cooperatives: Array,
+    details: Array
+})
 
 const form = useForm({
-    program_id: '',
+    coop_id: '',
     name: '',
 });
 
-const selectedProgram = ref('');
-
-function selectProgram(value: string) {
-    form.program_id = value;
-    selectedProgram.value = programOptions.find(opt => opt.value === value)?.label || '';
-}
-
 const handleSubmit = () => {
-    form.post('/cooperative');
-
+    form.post('cooperative/store');
 };
+
 </script>
 
 <template>
@@ -50,7 +40,7 @@ const handleSubmit = () => {
             <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 w-full md:w-8/12">
                 <h2 class="text-lg font-semibold mb-4">Create New Cooperative</h2>
 
-                <form @submit.prevent="handleSubmit" class="space-y-4">
+                <form @submit.prevent="" class="space-y-4">
                     <!-- Program Dropdown -->
                     <div class="space-y-2">
                         <Label for="program_id">Choose your Availed Program:</Label>
