@@ -14,11 +14,13 @@ class CooperativeSeeder extends Seeder
      */
     public function run(): void
     {
-        Cooperative::create([
-            'id' => sprintf('%03d-%03d', rand(100, 999), rand(100, 999)),
-            'name' => 'Primary Coop 1',
-            'type' => 'primary',
-            'holder' => null,
-        ]);
+        for ($i = 1; $i <= 10; $i++) {
+            Cooperative::create([
+                'id' => sprintf('%03d-%03d', rand(100, 999), rand(100, 999)),
+                'name' => 'Primary Coop ' . $i,
+                'type' => 'primary',
+                'holder' => null,
+            ]);
+        }
     }
 }

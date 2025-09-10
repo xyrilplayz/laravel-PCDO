@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->integer('grace_period');
             $table->decimal('min_amount', 12, 2)->nullable();
             $table->decimal('max_amount', 12, 2)->nullable();
-            $table->timestamps();
         });
     }
 

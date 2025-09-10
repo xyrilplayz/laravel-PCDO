@@ -16,9 +16,10 @@ class DatabaseSeeder extends Seeder
             MunicipalitySeeder::class,
             CooperativeSeeder::class,
             ProgramSeeder::class,
-            CoopProgramSeeder::class,
             CoopDetailSeeder::class,
+            ChecklistsSeeder::class,
             ProgramChecklistsSeeder::class,
+            CoopProgramSeeder::class,
         ]);
     }
 }

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Program;
+use App\Models\Programs;
 
 class ProgramSeeder extends Seeder
 {
@@ -22,7 +22,7 @@ class ProgramSeeder extends Seeder
         ];
 
         foreach ($programs as $data) {
-            Program::create($data);
+            Programs::create($data);
         }
     }
 }

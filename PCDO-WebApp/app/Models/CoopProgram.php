@@ -32,11 +32,22 @@ class CoopProgram extends Model
 
     public function program()
     {
-        return $this->belongsTo(Program::class);
+        return $this->belongsTo(Programs::class);
     }
 
     public function checklist()
     {
         return $this->hasMany(CoopProgramChecklist::class);
+    }
+
+    function generateChecklists()
+    {
+        $items = $this->program->checklists;
+        foreach ($items as $item) {
+            CoopProgramChecklist::firstOrCreate([
+                'coop_program_id' => $this->id,
+                'checklist_id' => $item->id,
+            ]);
+        }
     }
 }

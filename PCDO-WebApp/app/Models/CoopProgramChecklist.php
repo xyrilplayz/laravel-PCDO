@@ -17,15 +17,16 @@ class CoopProgramChecklist extends Model
         'file_content',
     ];
 
-    public function program()
+    function coopProgram()
     {
-        return $this->belongsTo(CoopProgram::class, 'coop_program_id');
+        return $this->belongsTo(CoopProgram::class);
     }
-    
-    public function checklist()
+
+    function checklist()
     {
-        return $this->belongsTo(ProgramChecklists::class, 'checklist_id');
+        return $this->belongsTo(Checklists::class);
     }
+
     public function getFileContentAttribute($value)
     {
         return base64_encode($value);

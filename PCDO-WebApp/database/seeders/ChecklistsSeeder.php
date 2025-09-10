@@ -5,15 +5,15 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Checklists;
-use App\Models\Programs;
-class ProgramChecklistsSeeder extends Seeder
+
+class ChecklistsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $common = Checklists::whereIn('name',[
+        $masterChecklists = [
             "Letter",
             "Project proposal",
             "Financial Plan",
@@ -37,20 +37,13 @@ class ProgramChecklistsSeeder extends Seeder
             "LGU or SP Accreditation",
             "MAO Certificate",
             "MDRRMO Certification",
-        ])->pluck('id')->toArray();
-
-        $extra = Checklists::whereIn('name',[
             "MCDC Endorsement",
             "MCDO",
             "PCC"
-        ])->pluck('id')->toArray();
-        
-        $programs = Programs::all();
-        foreach ($programs as $program) {
-            $program->checklists()->syncWithoutDetaching($common);
-            if ($program->name === 'LICAP') {
-                $program->checklists()->syncWithoutDetaching($extra);
-            }
+        ];
+
+        foreach ($masterChecklists as $name) {
+            Checklists::create(['name' => $name]);
         }
     }
 }

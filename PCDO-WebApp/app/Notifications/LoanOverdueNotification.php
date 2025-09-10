@@ -12,7 +12,6 @@ class LoanOverdueNotification extends Notification
     use Queueable;
 
     protected $loan;
-
     public function __construct($loan)
     {
         $this->loan = $loan;

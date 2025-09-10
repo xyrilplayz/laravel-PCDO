@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('asset_size', ['Micro', 'Small', 'Medium', 'Large', 'Unclassified']);
             $table->enum('coop_type', ['Credit', 'Consumers', 'Producers', 'Marketing', 'Service', 'Multipurpose', 'Advocacy', 'Agrarian Reform', 'Bank', 'Diary', 'Education', 'Electric', 'Financial', 'Fishermen', 'Health Services', 'Housing', 'Insurance', 'Water Service', 'Workers', 'Others']);
             $table->enum('status/category', ['Reporting', 'Non-Reporting', 'New']);
-            $table->enum('bond_of_membership', ['Residential', 'Insitutional', 'Associational', 'Occupational', '']);
+            $table->enum('bond_of_membership', ['Residential', 'Insitutional', 'Associational', 'Occupational', 'Unspecified']);
             $table->enum('area_of_operation',['Municipal', 'Provincial']);
             $table->enum('citizenship', ['Filipino', 'Others']);
             $table->bigInteger('members_count');

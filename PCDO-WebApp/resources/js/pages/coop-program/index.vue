@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import Button from '@/components/ui/button/Button.vue';
 import InputField from '@/components/ui/input/Input.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import cooperative from '@/routes/cooperative';
+import coopProgram from '@/routes/program';
 import { type BreadcrumbItem } from '@/types';
 import { CheckCircle, XCircle, CircleDashed, Search } from 'lucide-vue-next';
 import { Head, Link } from '@inertiajs/vue3';

@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ProgramChecklists extends Model
+class Checklists extends Model
 {
     protected $fillable = ['name'];
     public $timestamps = false;
 
     function programs()
     {
-        return $this->belongsToMany(Program::class, 'coop_program_checklists', 'checklist_id', 'program_id');
+       return $this->belongsToMany(Programs::class, 'program_checklists', 'checklist_id', 'program_id')->withPivot('id');
     }
 }

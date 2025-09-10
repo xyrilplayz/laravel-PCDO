@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\CoopProgram;
 use App\Models\Cooperative;
-use App\Models\ProgramChecklists;
-use App\Models\Program;
+use App\Models\Programs;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 
 class CoopProgramController extends Controller
@@ -15,26 +15,12 @@ class CoopProgramController extends Controller
      */
     public function index()
     {
-        $cooperatives = Cooperative::with('programs');
-        $coopPrograms = CoopProgram::with('checklists');
-        
+        $coopPrograms = CoopProgram::with(['program', 'cooperative', 'checklist'])
+            ->where('program_status', 'Ongoing')
+            ->get();
 
-        $checklistCount = ProgramChecklists::count();
-
-        // Add a computed status for each cooperative
-        $cooperatives->transform(function ($coop) use ($checklistCount) {
-            if ($coop->uploaded_files_count >= $checklistCount && $checklistCount > 0) {
-                $coop->status = 'Complete';
-            } elseif ($coop->uploaded_files_count > 0) {
-                $coop->status = 'Pending';
-            } else {
-                $coop->status = 'Incomplete';
-            }
-            return $coop;
-        });
-
-        return inertia('cooperative/index', [
-            'cooperatives' => $cooperatives,
+        return inertia('coop-program/index', [
+            'coopPrograms' => $coopPrograms,
         ]);
     }
 
@@ -43,7 +29,10 @@ class CoopProgramController extends Controller
      */
     public function create()
     {
-        //
+        return inertia('coop-program/create', [
+            'cooperatives' => Cooperative::all(),
+            'programs' => Programs::all(),
+        ]);
     }
 
     /**
@@ -51,28 +40,36 @@ class CoopProgramController extends Controller
      */
     public function store(Request $request)
     {
-        $coopId = $request->input('coop_id');
-        $programId = $request->input('program_id');
-        
-        $program = Program::findOrFail($programId);
+        $data = $request->validate([
+            'coop_id' => 'required|exists:cooperatives,id',
+            'program_id' => 'required|exists:programs,id',
+        ]);
+
+        $coopId = $data['coop_id'];
+        $programId = $data['program_id'];
+
+        $program = Programs::findOrFail($programId);
+
         $ongoingPrograms = CoopProgram::where('coop_id', $coopId)
                             ->where('program_status', 'Ongoing')
+                            ->with('program')
                             ->get();
 
         foreach ($ongoingPrograms as $ongoing) {
             if ($ongoing->program_id === $programId) {
                 return back()->withErrors(['program_id' => 'This program is already ongoing.']);
             }
+
             if ($program->name === 'LICAP' && $ongoing->program->name === 'LICAP') {
                 return back()->withErrors(['program_id' => 'LICAP program already ongoing.']);
             }
+
             if ($program->name !== 'LICAP' && $ongoing->program->name !== 'LICAP') {
                 return back()->withErrors(['program_id' => 'Cannot enroll in another non-LICAP program while one is ongoing.']);
             }
         }
 
-        // Only create if validation passed
-        CoopProgram::create([
+        $coopProgram = CoopProgram::create([
             'coop_id' => $coopId,
             'program_id' => $programId,
             'start_date' => now(),
@@ -82,7 +79,8 @@ class CoopProgramController extends Controller
             'loan_ammount' => rand($program->min_amount, $program->max_amount),
         ]);
 
-        return redirect()->back()->with('success', 'Program enrolled successfully.');
+        return redirect()->route('coop-programs.documents', $coopProgram->id)
+            ->with('success', 'Program enrolled successfully. Please upload required documents.');
     }
 
     /**
@@ -116,4 +114,71 @@ class CoopProgramController extends Controller
     {
         //
     }
+
+    public function schedule(CoopProgram $coopProgram)
+    {
+        return inertia('coop-program/schedule', [
+            'coopProgram' => $coopProgram
+        ]);
+    }
+
+    public function documents(CoopProgram $coopProgram)
+    {
+        $checklistItems = $coopProgram->program->checklists->map(function ($item) use ($coopProgram) {
+            $upload = $coopProgram->checklists()
+                ->where('program_checklist_id', $item->pivot->id)
+                ->first();
+
+            $item->upload = $upload;
+            return $item;
+        });
+
+        return Inertia::render('coop-program/document', [
+            'coopProgram' => $coopProgram->load('program'),
+            'checklistItems' => $checklistItems,
+        ]);
+    }
+
+    public function upload(Request $request, CoopProgram $coopProgram)
+    {
+        $request->validate([
+            'program_checklist_id' => 'required|exists:program_checklists,id',
+            'file' => 'required|file|max:5120',
+        ]);
+
+        $file = $request->file('file');
+
+        $coopProgram->checklists()->updateExistingPivot(
+            $request->program_checklist_id,
+            [
+                'file_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'file_content' => base64_encode(file_get_contents($file)),
+                'updated_at' => now(),
+            ]
+        );
+
+        return back()->with('success', 'File uploaded successfully!');
+    }
+
+    public function download(CoopProgram $coopProgram, $programChecklistId)
+    {
+        $pivot = $coopProgram->checklists()->where('program_checklist_id', $programChecklistId)->firstOrFail()->pivot;
+
+        return response(base64_decode($pivot->file_content))
+            ->header('Content-Type', $pivot->mime_type)
+            ->header('Content-Disposition', 'attachment; filename="' . $pivot->file_name . '"');
+    }
+
+    public function destroyUpload(CoopProgram $coopProgram, $programChecklistId)
+    {
+        $coopProgram->checklists()->updateExistingPivot($programChecklistId, [
+            'file_name' => null,
+            'mime_type' => null,
+            'file_content' => null,
+        ]);
+
+        return back()->with('success', 'File deleted successfully!');
+    }
+
 }
