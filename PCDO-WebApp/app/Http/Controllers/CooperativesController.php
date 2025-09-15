@@ -15,6 +15,8 @@ class CooperativesController extends Controller
             ->withCount(['programs as ongoing_program_count' => function ($q) {
                 $q->where('program_status', 'ongoing');
             }])
+            ->orderByDesc('ongoing_program_count')
+            ->orderBy('id')
             ->get()
             ->map(function ($coop) {
                 return [
@@ -31,6 +33,12 @@ class CooperativesController extends Controller
             'cooperatives' => $cooperatives,
             'breadcrumbs' => [
                 ['title' => 'Cooperatives', 'href' => route('cooperatives.index')],
+            ],
+            'urls' => [
+                'create' => route('cooperatives.create'),
+                'import' => route('cooperatives.import'),
+                'export' => route('cooperatives.export'),
+                'search' => route('cooperatives.search'),
             ],
         ]);
     }
