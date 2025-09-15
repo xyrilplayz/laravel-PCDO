@@ -11,11 +11,10 @@ class CooperativesController extends Controller
      */
     public function index()
     {
-        $cooperatives = Cooperative::withCount('members')
-            ->with(['programs' => function ($q) {
+        $cooperatives = Cooperative::with('details')
+            ->withCount(['programs as ongoing_program_count' => function ($q) {
                 $q->where('program_status', 'ongoing');
             }])
-            ->with('details')
             ->get()
             ->map(function ($coop) {
                 return [
@@ -23,13 +22,16 @@ class CooperativesController extends Controller
                     'name' => $coop->name,
                     'type' => $coop->type,
                     'holder' => $coop->holder,
-                    'member_count' => $coop->details->members_count,
-                    'has_ongoing_program' => $coop->programs->isNotEmpty(),
+                    'member_count' => $coop->details->members_count ?? 0,
+                    'has_ongoing_program' => $coop->ongoing_program_count > 0,
                 ];
             });
 
         return inertia('cooperatives/index', [
             'cooperatives' => $cooperatives,
+            'breadcrumbs' => [
+                ['title' => 'Cooperatives', 'href' => route('cooperatives.index')],
+            ],
         ]);
     }
 
@@ -38,7 +40,12 @@ class CooperativesController extends Controller
      */
     public function create()
     {
-        return inertia('cooperatives/create');
+        return inertia('cooperatives/create', [
+            'breadcrumbs' => [
+                ['title' => 'Cooperatives', 'href' => route('cooperatives.index')],
+                ['title' => 'Create Cooperative', 'href' => route('cooperatives.create')],
+            ],
+        ]);
     }
 
     /**
@@ -69,6 +76,10 @@ class CooperativesController extends Controller
         return inertia('cooperatives/show', [
             'cooperative' => $cooperative,
             'details' => $cooperative->details,
+            'breadcrumbs' => [
+                ['title' => 'Cooperatives', 'href' => route('cooperatives.index')],
+                ['title' => $cooperative->name, 'href' => route('cooperatives.show', $cooperative)],
+            ],
         ]);
     }
 
@@ -80,6 +91,11 @@ class CooperativesController extends Controller
         return inertia('cooperatives/edit', [
             'cooperative' => $cooperative,
             'details' => $cooperative->details,
+            'breadcrumbs' => [
+                ['title' => 'Cooperatives', 'href' => route('cooperatives.index')],
+                ['title' => $cooperative->name, 'href' => route('cooperatives.show', $cooperative)],
+                ['title' => 'Edit Cooperative', 'href' => route('cooperatives.edit', $cooperative)],
+            ],
         ]);
     }
 

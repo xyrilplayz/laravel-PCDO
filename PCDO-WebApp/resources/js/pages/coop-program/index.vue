@@ -1,21 +1,9 @@
 <script setup lang="ts"> 
 import { ref, computed } from 'vue'
 import Button from '@/components/ui/button/Button.vue';
-import InputField from '@/components/ui/input/Input.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import coopProgram from '@/routes/coop-program';
-import { type BreadcrumbItem } from '@/types';
-import { CheckCircle, XCircle, CircleDashed, Search } from 'lucide-vue-next';
-import { Head, Link } from '@inertiajs/vue3';
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
+import BreadcrumbItem from '@/components/ui/breadcrumb/BreadcrumbItem.vue';
 
 interface Program {
     name: string
@@ -31,13 +19,6 @@ interface Cooperative {
 const props = defineProps<{
     cooperatives: Cooperative[]
 }>()
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Cooperative',
-        href: cooperative.index().url,
-    },
-];
 
 // Search query state
 const searchQuery = ref('')
@@ -56,7 +37,7 @@ const filteredCooperatives = computed(() => {
 <template>
     <Head title="Cooperative" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <AppLayout : breadcrumbs="breadcrumbs">">
         <!-- Header with Search and Create Button -->
         <div class="flex items-center justify-between p-6">
             <div class="relative w-200"> 

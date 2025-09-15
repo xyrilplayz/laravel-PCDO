@@ -5,14 +5,7 @@ import Label from '@/components/ui/label/Label.vue';
 import { DropdownMenuRoot, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from 'reka-ui';
 import AppLayout from '@/layouts/AppLayout.vue';
 import cooperative from '@/routes/cooperative';
-import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Cooperative Program', href: cooperative.index().url },
-    { title: 'Create Cooperative', href: cooperative.create().url },
-];
 
 const programOptions = [
     { label: 'USAD', value: '1' },

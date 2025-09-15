@@ -8,6 +8,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
+use App\Mail\LoginCodeMail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,11 +32,55 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        if (!Auth::validate($request->only('email', 'password'))) {
+            return back()->withErrors([
+                'email' => __('auth.failed'),
+            ]);
+        }
 
-        $request->session()->regenerate();
+        $user = User::where('email', $request->email)->first();
+        $code = rand(100000, 999999);
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        session([
+            'login_user_id' => $user->id,
+            'login_code' => $code,
+            'login_code_expires' => now()->addMinutes(5),
+        ]);
+
+        Mail::to($user->email)->send(new LoginCodeMail($code));
+
+        return redirect()->route('login.verify');    }
+
+    /**
+     * Show the verify code page.
+     */
+    public function verifyForm(): Response
+    {
+        return Inertia::render('auth/VerifyCode');
+    }
+
+    /**
+     * Handle the verification code submission.
+     */
+    public function verify(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'code' => ['required', 'numeric'],
+        ]);
+
+        if (
+            session('login_code') == $request->code &&
+            now()->lt(session('login_code_expires'))
+        ) {
+            Auth::loginUsingId(session('login_user_id'));
+            $request->session()->regenerate();
+
+            session()->forget(['login_user_id', 'login_code', 'login_code_expires']);
+
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+
+        return back()->withErrors(['code' => 'Invalid or expired code.']);
     }
 
     /**
