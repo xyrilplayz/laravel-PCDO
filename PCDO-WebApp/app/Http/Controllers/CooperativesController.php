@@ -15,8 +15,6 @@ class CooperativesController extends Controller
             ->withCount(['programs as ongoing_program_count' => function ($q) {
                 $q->where('program_status', 'ongoing');
             }])
-            ->orderByDesc('ongoing_program_count')
-            ->orderBy('id')
             ->get()
             ->map(function ($coop) {
                 return [
