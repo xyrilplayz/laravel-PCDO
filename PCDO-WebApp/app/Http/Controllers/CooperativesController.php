@@ -34,12 +34,6 @@ class CooperativesController extends Controller
             'breadcrumbs' => [
                 ['title' => 'Cooperatives', 'href' => route('cooperatives.index')],
             ],
-            'urls' => [
-                'create' => route('cooperatives.create'),
-                'import' => route('cooperatives.import'),
-                'export' => route('cooperatives.export'),
-                'search' => route('cooperatives.search'),
-            ],
         ]);
     }
 
